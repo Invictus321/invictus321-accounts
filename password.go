@@ -19,7 +19,11 @@ func (a accountService) hashPassword(password string, salt []byte) (passwordHash
 	return
 }
 
-func (a accountService) comparePasswords(password string, encryptedPassword, salt []byte) error {
+func (a accountService) comparePasswords(password string, passedEncryptedPassword, salt []byte) error {
+	// copy the password into a new array so we don't mutate the user
+	encryptedPassword := make([]byte, len(passedEncryptedPassword))
+	copy(encryptedPassword, passedEncryptedPassword)
+	
 	passwordKey := base64.StdEncoding.EncodeToString(pbkdf2.Key([]byte(password), salt, 3000, 16, sha1.New))
 	decryptedPassword, err := decrypt(a.encryptionKey, encryptedPassword)
 	if err != nil {
